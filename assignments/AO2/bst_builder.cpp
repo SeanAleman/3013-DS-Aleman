@@ -1,5 +1,5 @@
 /********************************************************************
-Sean Aleman - Program 1 - BST
+Sean Aleman - Program 1 - BST - 9/18/2019
 This program accepts an input file which has 1 number per line on it.
 It takes these numbers and puts them in a vector.
 Then it sorts the vector.
