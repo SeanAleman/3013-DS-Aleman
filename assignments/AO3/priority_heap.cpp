@@ -487,9 +487,10 @@ total = (((6372.8 - d)*(A[i]->priority) )/ nameToNumber1(A[i]->animal_name));
 	
 	//prints the max heaps to the outfile
 	for (int i = 0; i < NumberOfBuckets; i++) {
+
+		outfile << "Heap " << i << endl;
+		outfile << "====================================" << endl;
 		for (int j = 1; j <= 5; j++) {
-			outfile << "Heap " << i << endl;
-			outfile << "====================================" << endl;
 			Buckets[i]->Extract(outfile);
 		}
 	}
