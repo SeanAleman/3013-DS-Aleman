@@ -1,3 +1,21 @@
+/**
+ * Name: Sean Aleman
+ * Date: 10/06/2019
+ * Course: CMPS 3013
+ * Program: A03
+ * Description:
+ This program uses a binary heap in order to create a priority queue. 
+ This progam takes an input file, which consists of animal objects, 
+ each animal having various attrbutes like date, name, adjuster. The
+ priority is processed using a calculation. After the priority is 
+ determined, a bucket is created which holds max heaps where the order 
+ is based on the calculated priority. This program prints to an outfile.
+ It prints the Max heaps inside each buckets. The user decides how many
+ buckets to create when the program begins. 
+ *
+ *      
+ */
+
 //https://stackoverflow.com/questions/55116344/how-to-setup-vs-code-for-c-14-c-17
 //https://github.com/nlohmann/json
 
@@ -130,9 +148,9 @@ public:
 	void PrintAnimals() {
 
 		for (int i = 0; i < size; i++) {
-
+			 
 			cout << Animals[i]->animal_name << " "
-				<< Animals[i]->latitude << " "
+			    << Animals[i]->latitude << " "
 				<< Animals[i]->longitude << " "
 				<< Animals[i]->date << " "
 				<< Animals[i]->priority << " "
@@ -337,7 +355,7 @@ public:
 	 * Returns
 	 *      [int] top_value - top value in the heap (min or max)
 	 */
-	Animal Extract() {
+	Animal Extract(ofstream &outfile) {
 
 		//if (Empty()) {
 		//	return -1;
@@ -350,7 +368,7 @@ public:
 		if (HeapSize > 1) {
 			BubbleDown(1);
 		}
-		PrintHeap(retval);
+		PrintHeap(retval, outfile);
 		return *retval;
 	}
 
@@ -364,9 +382,10 @@ public:
 	 * Returns
 	 *      void
 	 */
-	void PrintHeap(Animal* H) { 
-			cout << H->animal_name << endl;
-			cout << H->priority << endl << endl;
+	void PrintHeap(Animal* H ,ofstream &outfile) { 
+		
+			outfile << H->animal_name << endl;
+			outfile << H->priority << endl << endl;
 		
 		
 	}
@@ -420,15 +439,18 @@ public:
 
 
 int main(int argc, char **argv) {
+	// creates the helper and opens outfile
 	AnimalHelper AH("animals.json");
 	JsonHelper JH("animals.json");
-
+	ofstream outfile;
+	outfile.open("output.txt");
+	outfile << "Sean Aleman" << endl;
 
 	Animal** A = AH.ReturnAnimals();
-	//H = new Animal*[1];
 
 	int a = AH.size;
 	Heap H(AH.size);
+
 	cout << "Enter Number of Buckets"; 
 
 	int NumberOfBuckets = 0;
@@ -440,6 +462,7 @@ int main(int argc, char **argv) {
 		Buckets[i] = new Heap(AH.size);
 	}
 
+	//the following for loop recalculates priority for animals in the heap
 	for (int i = 0; i < AH.size; i++) {
 		double d = 0; 
 		double total = 0;
@@ -449,30 +472,27 @@ int main(int argc, char **argv) {
 
 		d = HaversineDistance(a1, a2);
 		bool v = A[i]->validated;
-		total = (((6372.8 - d)*(A[i]->priority) )/ nameToNumber1(A[i]->animal_name));
+total = (((6372.8 - d)*(A[i]->priority) )/ nameToNumber1(A[i]->animal_name));
 		if (v == 1) {
 			total = -total;
 		}
 		A[i]->priority = total;
 
 	}
-
+	//inserts the max heaps into the buckets
 	for (int i = 0; i < AH.size; i++) {
 		int bucket = abs(A[i]->date) % NumberOfBuckets;
 		Buckets[bucket]->Insert(A[i]);
 	}
 	
-	//H.Heapify(*A, AH.size);
-	cout << endl << endl << endl << endl << endl;
-	
+	//prints the max heaps to the outfile
 	for (int i = 0; i < NumberOfBuckets; i++) {
-
 		for (int j = 1; j <= 5; j++) {
-			cout << "Heap " << i << endl;
-			cout << "========================" << endl;
-			Buckets[i]->Extract();
-
+			outfile << "Heap " << i << endl;
+			outfile << "====================================" << endl;
+			Buckets[i]->Extract(outfile);
 		}
 	}
+	outfile.close();
 	return 0;
 }
