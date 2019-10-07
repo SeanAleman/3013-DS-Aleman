@@ -169,7 +169,7 @@ private:
 	 */
 	void BubbleUp(int i) {
 		int p = Parent(i);
-		while (p > 0 && H[i] > H[p]) {
+		while (p > 0 && H[i]->priority > H[p]->priority) {
 			Swap(i, p);
 			i = p;
 			p = Parent(i);
@@ -189,7 +189,7 @@ private:
 		int c = PickChild(i);
 
 		while (c > 0) {
-			if (H[i] < H[c]) {
+			if (H[i]->priority < H[c]->priority) {
 				Swap(i, c);
 				i = c;
 				c = PickChild(i);
@@ -304,7 +304,7 @@ public:
 		HeapSize = 0;
 	}
 	Heap() {
-		H = new Animal*[0];
+		H = new Animal*[1];
 		Next = 1;
 		MaxSize = 0;
 		HeapSize = 0;
@@ -343,15 +343,15 @@ public:
 		//	return -1;
 		//}
 
-		Animal retval = *H[1];
+		Animal *retval = H[1];
 		H[1] = H[--Next];
 		HeapSize--;
 
 		if (HeapSize > 1) {
 			BubbleDown(1);
 		}
-
-		return retval;
+		PrintHeap(retval);
+		return *retval;
 	}
 
 	/**
@@ -364,12 +364,11 @@ public:
 	 * Returns
 	 *      void
 	 */
-	void PrintHeap() {
-		for (int i = 0; i < HeapSize; i++) {
-			cout << *(&H[i]->animal_name) << endl;
-			cout << *(&H[i]->priority) << endl << endl;
-		}
-		cout << endl;
+	void PrintHeap(Animal* H) { 
+			cout << H->animal_name << endl;
+			cout << H->priority << endl << endl;
+		
+		
 	}
 
 	/**
@@ -408,14 +407,12 @@ public:
 	 * Returns
 	 *      void
 	 */
-	void Heapify(Animal **&A, int size) {
+	void Heapify(Animal *A, int size) {
 		int i = size / 2;
-		H = A;
-		HeapSize = size - 1;
+		
 
 		for (int j = i; j >= 1; j--) {
 			BubbleDown(j);
-			Next = Next++;
 		}
 	}
 };
@@ -427,6 +424,7 @@ int main(int argc, char **argv) {
 	JsonHelper JH("animals.json");
 
 
+	Animal** A = AH.ReturnAnimals();
 	//H = new Animal*[1];
 
 	int a = AH.size;
@@ -439,82 +437,42 @@ int main(int argc, char **argv) {
 	Heap** Buckets = new Heap*[NumberOfBuckets];
 
 	for (int i = 0; i < NumberOfBuckets; i++) {
-		Buckets[i] = new Heap;
+		Buckets[i] = new Heap(AH.size);
 	}
-
-
-	Animal** A = AH.ReturnAnimals();
 
 	for (int i = 0; i < AH.size; i++) {
 		double d = 0; 
 		double total = 0;
-		cout << A[i]->animal_name << endl;
-		cout << A[i]->priority << endl;
-		//cout << nameToNumber(A[i]->animal_name) << endl;
-		//A[i]->priority = nameToNumber(A[i]->animal_name);
 
 		Coordinate a1(A[i]->latitude, (A[i]->longitude));
+		Coordinate a2(33.9137, -98.4934);
+
+		d = HaversineDistance(a1, a2);
 		bool v = A[i]->validated;
 		total = (((6372.8 - d)*(A[i]->priority) )/ nameToNumber1(A[i]->animal_name));
-			if (v == 1)
+		if (v == 1) {
 			total = -total;
-			A[i]->priority = total;
+		}
+		A[i]->priority = total;
 
-
-
-
-
-			int bucket = abs(A[i]->date) % NumberOfBuckets;
-			Buckets[bucket]->Insert(A[i]);
-
-		//double d = HaversineDistance(a1, a1);
-		//cout << d; 
-
-		//cout << A[i]->animal_name << endl;
-		//cout << nameToNumber(A[i]->animal_name) << endl;
-		//cout << A[i]->priority << endl;
 	}
-	cout << endl << endl << endl << endl;
+
 	for (int i = 0; i < AH.size; i++) {
-		cout << A[i]->animal_name << endl;
-		//cout << nameToNumber(A[i]->animal_name) << endl;
-		cout << A[i]->priority << endl;
+		int bucket = abs(A[i]->date) % NumberOfBuckets;
+		Buckets[bucket]->Insert(A[i]);
 	}
-
-	//H.PrintHeap();
-	H.Heapify(A, AH.size);
+	
+	//H.Heapify(*A, AH.size);
 	cout << endl << endl << endl << endl << endl;
-	H.PrintHeap();
-	//cout << &H[1];
-	//H.PrintHeap();
-	//cout << a;
 	
 	for (int i = 0; i < NumberOfBuckets; i++) {
-		Buckets[i]->Extract();
 
-		cout << A[i]->priority << endl;
-		Buckets[i]->Extract();
-		Buckets[i]->Extract();
-		Buckets[i]->Extract();
-		Buckets[i]->Extract();
+		for (int j = 1; j <= 5; j++) {
+			cout << "Heap " << i << endl;
+			cout << "========================" << endl;
+			Buckets[i]->Extract();
 
+		}
 	}
-	
-	system("pause");
-	//AH.PrintAnimals();
-	/*
-	 for (int i = 0, i<AH.size, i++ ){
-
-	}
-	The priority will be calculated by doing the following :
-
-	L = length of the animal_name
-		D = distance(latitude, longitude) is from(33.9137, -98.4934)
-		A = adjustor
-		V = validated
-		Bucket = abs(date) % number_of_buckets
-
-		Priority = (6372.8 - D) * A / L
-		*/
 	return 0;
 }
